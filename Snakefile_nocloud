@@ -1,0 +1,136 @@
+shell.executable("/bin/bash")
+shell.prefix("source $HOME/.bashrc; ")
+
+IDS,  = glob_wildcards("runs/{id}.txt")
+IDS2, = glob_wildcards("runs/{id}.txt")
+
+######################################################
+#
+# 
+# rule "all" is the default rule that Snakemake runs
+# this rule basically pulls data through the entire
+# pipeline by specifying the final outputs of the
+# pipeline as input. The rule does nothing
+#
+#
+######################################################
+
+rule all:
+	input: expand("coverage/{sample}.{sample2}.txt", sample=IDS, sample2=IDS2)
+
+
+######################################################
+#
+#
+# staging rules - these are designed to run each stage
+# of the pipleine one after the other
+#
+#
+######################################################
+
+rule run_cutadapt:
+	input: expand("trimmed/{sample}_1.t.fastq.gz", sample=IDS)
+
+rule run_megahit:
+	input: expand("megahit/{sample}/final.contigs.fa", sample=IDS)
+
+rule run_bwa_index:
+	input: expand("bwa_indices/{sample}.fa.ann", sample=IDS)
+
+rule run_bwa_mem:
+	input: expand("bam/{sample}.{sample2}.bam.flagstat", sample=IDS, sample2=IDS2)
+
+rule run_coverage:
+	input: expand("coverage/{sample}.{sample2}.txt", sample=IDS, sample2=IDS2)
+		
+######################################################
+#
+#
+# The actual rules
+#
+#
+######################################################
+
+rule cutadapt:
+	input: "runs/{id}.txt"
+
+	output:
+		R1="trimmed/{id}_1.t.fastq.gz",
+		R2="trimmed/{id}_2.t.fastq.gz"
+	params:
+		id="{id}"
+	conda: "envs/cutadapt.yaml"
+	threads: 4
+	shell: "curl https://raw.githubusercontent.com/WatsonLab/GoogleMAGs/master/scripts/ftp_n_trimm.sh | bash -s {params.id} {output.R1} {output.R2}"
+
+
+
+
+rule megahit:
+	input:
+		R1="trimmed/{id}_1.t.fastq.gz",
+		R2="trimmed/{id}_2.t.fastq.gz"
+	params:
+		di="megahit/{id}"
+	output: 
+#		di="megahit/{id}/",
+		fa="megahit/{id}/final.contigs.fa"
+	conda: "envs/megahit.yaml"
+	threads: 8
+	shell: "mkdir -p {params.di} && megahit --continue --k-list 27,47,67,87 --kmin-1pass -m 0.95 --min-contig-len 1000 -t {threads} -1 {input.R1} -2 {input.R2} -o {params.di}"
+
+
+rule bwa_index:
+	input:  "megahit/{id}/final.contigs.fa"
+	output: 
+		ann="bwa_indices/{id}.fa.ann",
+		pac="bwa_indices/{id}.fa.pac",
+		amb="bwa_indices/{id}.fa.amb",
+		bwt="bwa_indices/{id}.fa.bwt",
+		sa ="bwa_indices/{id}.fa.sa"
+	params:
+		idx="bwa_indices/{id}.fa"
+	conda: "envs/bwa.yaml"
+	threads: 8
+	shell:
+		'''
+		bwa index -p {params.idx} {input}
+		'''
+
+rule bwa_mem:
+	input:
+		R1="trimmed/{id}_1.t.fastq.gz",
+		R2="trimmed/{id}_2.t.fastq.gz",
+		ann="bwa_indices/{id2}.fa.ann",
+		pac="bwa_indices/{id2}.fa.pac",
+		amb="bwa_indices/{id2}.fa.amb",
+		bwt="bwa_indices/{id2}.fa.bwt",
+		sa ="bwa_indices/{id2}.fa.sa"
+	output: 
+		bam="bam/{id}.{id2}.bam",
+		bai="bam/{id}.{id2}.bam.bai",
+		fla="bam/{id}.{id2}.bam.flagstat"
+	params:
+		idx="bwa_indices/{id2}.fa"
+	conda: "envs/bwa.yaml"
+	threads: 8
+	shell: 
+		'''
+		bwa mem -t 8 {params.idx} {input.R1} {input.R2} | samtools sort -@8 -m 500M -o {output.bam} -
+		samtools index {output.bam}
+
+		samtools flagstat {output.bam} > {output.fla}
+		'''
+	
+rule coverage:
+	input: 
+		bam="bam/{id}.{id2}.bam",
+		bai="bam/{id}.{id2}.bam.bai"
+	output:
+		cov="coverage/{id}.{id2}.txt"
+	conda: "envs/metabat2.yaml"
+	shell:
+		'''
+		jgi_summarize_bam_contig_depths --outputDepth {output.cov} {input.bam}
+		'''	
+
