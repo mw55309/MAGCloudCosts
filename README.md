@@ -7,6 +7,13 @@ Costing MAG creation on the cloud
 
 Log in to google cloud platform, create a small basic VM and SSH into it
 
+We currently use:
+
+* Debian GNU/Linux 9 (stretch) 
+* 1 vCPU
+* 5.5Gb RAM
+* "Allow full access to all Cloud APIs"
+
 ### 2 download and install conda
 
 ```sh
@@ -29,7 +36,7 @@ conda update -n base conda
 
 ### 3 Clone this github repo
 
-Clone this git hub repo
+Clone this git hub repo.
 
 ### 4 create the cloud metagenomics env and activate it
 
