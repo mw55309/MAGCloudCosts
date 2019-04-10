@@ -134,11 +134,11 @@ rule bwa_mem:
 		'''
 	
 rule coverage:
-	input: 
-		bam=GS.remote(GS_PREFIX + "/bam/{id}.{id2}.bam"),
-		bai=GS.remote(GS_PREFIX + "/bam/{id}.{id2}.bam.bai")
+	input:
+		bam=GS.remote(expand(GS_PREFIX + "/bam/{sample}.{{each}}.bam", sample=IDS)),
+		bai=GS.remote(expand(GS_PREFIX + "/bam/{sample}.{{each}}.bam.bai", sample=IDS))
 	output:
-		cov=GS.remote(GS_PREFIX + "/coverage/{id}.{id2}.txt")
+		cov=GS.remote(GS_PREFIX + "/coverage/{each}.txt")
 	conda: "envs/metabat2.yaml"
 	shell:
 		'''
