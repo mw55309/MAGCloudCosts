@@ -16,7 +16,15 @@ We currently use:
 * Allow http and https traffic
 * Use default service account
 
-### 2 download and install conda
+### 2 update some tools on the VM
+
+```sh
+sudo apt-get update
+
+sudo apt-get install git bzip2
+```
+
+### 3 download and install conda
 
 ```sh
 wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
@@ -36,18 +44,18 @@ source $HOME/.bashrc
 conda update -n base conda
 ```
 
-### 3 Clone this github repo
+### 4 Clone this github repo
 
 Clone this git hub repo.
 
-### 4 create the cloud metagenomics env and activate it
+### 5 create the cloud metagenomics env and activate it
 
 ```sh
 conda env create -f envs/google_cloud_metagenomics.yaml
 source activate google_cloud_metagenomics
 ```
 
-### 5 install additional stuff
+### 6 install additional stuff
 
 ```sh
 pip install --upgrade google-api-python-client
