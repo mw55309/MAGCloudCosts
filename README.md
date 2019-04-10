@@ -3,6 +3,10 @@ Costing MAG creation on the cloud
 
 ## Steps
 
+Before you start you will need a Google Cloud Platform account, you will need to set up a billing account (either credit card or by invoice), you will need to set up a project (e.g. called ```my_project``` and you will need to make sure your billing account is linked to your project.
+
+Then:
+
 ### 1. Get a GCP VM
 
 Log in to google cloud platform, create a small basic VM and SSH into it
@@ -78,3 +82,23 @@ I am not sure quite yet why they need to match but they do
 ```sh
 gsutil cp -r runs gs://my_bucket
 ```
+
+### 9 Authorise
+
+```sh
+gcloud auth login
+```
+
+Click on the link, authorise and copy back the code to the console
+
+```sh
+gcloud auth application-default login 
+```
+
+Follow the same process
+
+```sh
+gcloud config set project my_project # set to project
+```
+
+Use the name of your project in the above command
