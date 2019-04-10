@@ -60,6 +60,21 @@ source activate google_cloud_metagenomics
 ```sh
 pip install --upgrade google-api-python-client
 pip install google-cloud-storage
-pip install kubernetes
-conda install -c conda-forge google-cloud-sdk 
+pip install kubernetes 
+```
+
+### 7 create a bucket for pipeline inputs/outputs
+
+In the google cloud console, go to Storage -> Browser and create a new bucket
+
+Regional is fine but make sure it's the same region as the kubernetes cluster and your VM
+
+Let's assume your bucket is called ```my_bucket```
+
+### 8 copy runs folder to bucket
+
+I am not sure quite yet why they need to match but they do
+
+```sh
+gsutil cp -r runs gs://my_bucket
 ```
