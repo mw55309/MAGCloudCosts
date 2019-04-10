@@ -37,7 +37,7 @@ rule all:
 ######################################################
 
 rule run_cutadapt:
-	input: GS.remote(expand(GS_PREFIX + "/trimmed/{sample}_1.t.fastq.gz", sample=IDS)))
+	input: GS.remote(expand(GS_PREFIX + "/trimmed/{sample}_1.t.fastq.gz", sample=IDS))
 
 rule run_megahit:
 	input: GS.remote(expand(GS_PREFIX + "/megahit/{sample}/final.contigs.fa", sample=IDS))
