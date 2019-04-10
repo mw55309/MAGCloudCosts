@@ -13,10 +13,52 @@ shell.prefix("source $HOME/.bashrc; ")
 IDS,  = glob_wildcards("runs/{id}.txt")
 IDS2, = glob_wildcards("runs/{id}.txt")
 
+######################################################
+#
+#
+# rule "all" is the default rule that Snakemake runs
+# this rule basically pulls data through the entire
+# pipeline by specifying the final outputs of the
+# pipeline as input. The rule does nothing
+#
+#
+######################################################
+
+
 rule all:
 	input: GS.remote(expand(GS_PREFIX + "/coverage/{sample}.{sample2}.txt", sample=IDS, sample2=IDS2))
 
-#rule download has been integrated into the cutadpat to reduce network transfer
+######################################################
+#
+#
+# staging rules - these are designed to run each stage
+# of the pipleine one after the other
+#
+#
+######################################################
+
+rule run_cutadapt:
+	input: GS.remote(expand(GS_PREFIX + "/trimmed/{sample}_1.t.fastq.gz", sample=IDS)))
+
+rule run_megahit:
+	input: GS.remote(expand(GS_PREFIX + "/megahit/{sample}/final.contigs.fa", sample=IDS))
+
+rule run_bwa_index:
+	input: GS.remote(expand(GS_PREFIX + "/bwa_indices/{sample}.fa.ann", sample=IDS))
+
+rule run_bwa_mem:
+	input: GS.remote(expand(GS_PREFIX + "/bam/{sample}.{sample2}.bam.flagstat", sample=IDS, sample2=IDS2))
+
+rule run_coverage:
+	input: GS.remote(expand(GS_PREFIX + "/coverage/{sample}.{sample2}.txt", sample=IDS, sample2=IDS2))
+
+######################################################
+#
+#
+# The actual rules
+#
+#
+######################################################
 
 rule cutadapt:
 	input: "runs/{id}.txt"

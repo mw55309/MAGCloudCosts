@@ -16,7 +16,7 @@ IDS2, = glob_wildcards("runs/{id}.txt")
 ######################################################
 
 rule all:
-	input: expand("coverage/{sample}.{sample2}.txt", sample=IDS, sample2=IDS2)
+	input: expand("checkm/{sample}.checkm.txt", sample=IDS)
 
 
 ######################################################
@@ -41,7 +41,13 @@ rule run_bwa_mem:
 	input: expand("bam/{sample}.{sample2}.bam.flagstat", sample=IDS, sample2=IDS2)
 
 rule run_coverage:
-	input: expand("coverage/{sample}.{sample2}.txt", sample=IDS, sample2=IDS2)
+	input: expand("coverage/{sample}.txt", sample=IDS)
+
+rule run_metabat2:
+	input: expand("metabat2/{sample}/{sample}.unbinned.fa", sample=IDS)
+
+rule run_checkm:
+	input: expand("checkm/{sample}.checkm.txt", sample=IDS)
 		
 ######################################################
 #
@@ -123,14 +129,54 @@ rule bwa_mem:
 		'''
 	
 rule coverage:
-	input: 
-		bam="bam/{id}.{id2}.bam",
-		bai="bam/{id}.{id2}.bam.bai"
-	output:
-		cov="coverage/{id}.{id2}.txt"
+	input:
+		bam=expand("bam/{sample}.{{each}}.bam", sample=IDS)
+	output: 
+		cov="coverage/{each}.txt"
 	conda: "envs/metabat2.yaml"
 	shell:
 		'''
 		jgi_summarize_bam_contig_depths --outputDepth {output.cov} {input.bam}
-		'''	
+		'''
 
+rule metabat2:
+	input:
+		asm="megahit/{id}/final.contigs.fa",
+		cov="coverage/{id}.txt"
+	output:
+		unb="metabat2/{id}/{id}.unbinned.fa",
+		dir="metabat2/{id}/"
+	params:
+		out="metabat2/{id}/{id}"
+	threads: 8
+	conda: "envs/metabat2.yaml"
+	shell:
+		'''
+		metabat2 -t {threads} -i {input.asm} -a {input.cov} --unbinned -o {params.out}
+		'''
+
+rule checkm_data:
+	output: "checkm_data"
+	shell:
+		'''
+		mkdir -p {output}
+		cd {output}
+		wget https://data.ace.uq.edu.au/public/CheckM_databases/checkm_data_2015_01_16.tar.gz
+		gunzip < checkm_data_2015_01_16.tar.gz | tar xvf -
+		cd ..
+		'''
+
+rule checkm:
+	input:
+		dir="metabat2/{id}/",
+		cin="checkm_data"
+	output: "checkm/{id}.checkm.txt"
+	params:
+		dir="checkm/{id}"
+	threads: 8
+	conda: "envs/checkm.yaml"
+	shell: 
+		'''
+		echo {input.cin} | checkm data setRoot {input.cin} 
+		checkm lineage_wf --tab_table -f {output} --reduced_tree -t {threads} -x fa {input.dir} {params.dir}
+		'''
