@@ -13,6 +13,8 @@ We currently use:
 * 1 vCPU
 * 5.5Gb RAM
 * "Allow full access to all Cloud APIs"
+* Allow http and https traffic
+* Use default service account
 
 ### 2 download and install conda
 
