@@ -150,7 +150,7 @@ rule metabat2:
 		asm=GS.remote(GS_PREFIX + "/megahit/{id}/final.contigs.fa"),
 		cov=GS.remote(GS_PREFIX + "/coverage/{id}.txt")
 	output:
-		unb=GS.remote(GS_PREFIX + "/metabat2/{id}/{id}.unbinned.fa"),
+		#unb=GS.remote(GS_PREFIX + "/metabat2/{id}/{id}.unbinned.fa"),
 		dir=GS.remote(GS_PREFIX + "/metabat2/{id}/")
 	params:
 		out=GS.remote(GS_PREFIX + "/metabat2/{id}/{id}")
