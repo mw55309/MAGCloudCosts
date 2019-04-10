@@ -42,4 +42,14 @@ Clone this git hub repo.
 
 ```sh
 conda env create -f envs/google_cloud_metagenomics.yaml
+source activate google_cloud_metagenomics
+```
+
+### 5 install additional stuff
+
+```sh
+pip install --upgrade google-api-python-client
+pip install google-cloud-storage
+pip install kubernetes
+conda install -c conda-forge google-cloud-sdk 
 ```
