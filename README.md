@@ -102,3 +102,40 @@ gcloud config set project my_project # set to project
 ```
 
 Use the name of your project in the above command
+
+### 10 trial run
+
+```sh
+snakemake -np -s Snakefile --default-remote-provider GS --default-remote-prefix my_bucket
+```
+
+This should produce
+
+```
+Job counts:
+        count   jobs
+        1       all
+        2       bwa_index
+        4       bwa_mem
+        2       checkm
+        1       checkm_data
+        2       coverage
+        2       cutadapt
+        2       megahit
+        2       metabat2
+        18
+```
+
+### 11 set up Kubernetes cluster
+
+```
+export CLOUDSDK_CONTAINER_USE_APPLICATION_DEFAULT_CREDENTIALS=true # environment variable needed to make conda gcloud work
+
+gcloud container clusters get-credentials mw-metagenomics --zone europe-west1-b # get credentials for my kubernetes cluster
+```
+
+### 12 run it
+
+```
+snakemake -p --verbose --keep-remote -j 4000 --kubernetes -s Snakefile --default-remote-provider GS --default-remote-prefix my_bucket --use-conda 
+```
