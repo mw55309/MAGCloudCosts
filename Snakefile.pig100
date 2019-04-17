@@ -158,6 +158,7 @@ rule metabat2:
 	conda: "envs/metabat2.yaml"
 	shell:
 		'''
+		mkdir -p {output.dir}
 		metabat2 -t {threads} -i {input.asm} -a {input.cov} --unbinned -o {params.out}
 		'''
 
