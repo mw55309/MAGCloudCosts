@@ -6,46 +6,46 @@ CLUSTERNAME=snake-cluster-1
 CLUSTERZONE=europe-west1-b
 GSPREFIX=hn-snakemake
 SNAKEFILE=Snakefile.hn.pig${SAMPLES}
+DOCKERIMAGE='gcr.io/tagareby/snakemake'
 
 #Run run_cutadapt
 RULE=run_cutadapt
 gcloud container clusters update $CLUSTERNAME --update-labels sample-count=$SAMPLES,rule=$RULE,run-id=$RUNID --zone $CLUSTERZONE
-snakemake  -p --verbose --keep-remote  -j 400 --kubernetes -s $SNAKEFILE --default-remote-provider GS  --default-remote-prefix $GSPREFIX --use-conda $RULE
+snakemake  -p --verbose --keep-remote  -j 400 --kubernetes -s $SNAKEFILE --default-remote-provider GS  --default-remote-prefix $GSPREFIX --use-conda $RULE --container-image $DOCKERIMAGE
 
 #Run run_megahit
 RULE=run_megahit
 gcloud container clusters update $CLUSTERNAME --update-labels sample-count=$SAMPLES,rule=$RULE,run-id=$RUNID --zone $CLUSTERZONE
-snakemake  -p --verbose --keep-remote  -j 400 --kubernetes -s $SNAKEFILE --default-remote-provider GS  --default-remote-prefix $GSPREFIX --use-conda $RULE
+snakemake  -p --verbose --keep-remote  -j 400 --kubernetes -s $SNAKEFILE --default-remote-provider GS  --default-remote-prefix $GSPREFIX --use-conda $RULE --container-image $DOCKERIMAGE
 
 
 #Run run_bwa_index
 RULE=run_bwa_index
 gcloud container clusters update $CLUSTERNAME --update-labels sample-count=$SAMPLES,rule=$RULE,run-id=$RUNID --zone $CLUSTERZONE
-snakemake  -p --verbose --keep-remote  -j 400 --kubernetes -s $SNAKEFILE --default-remote-provider GS  --default-remote-prefix $GSPREFIX --use-conda $RULE
-
+snakemake  -p --verbose --keep-remote  -j 400 --kubernetes -s $SNAKEFILE --default-remote-provider GS  --default-remote-prefix $GSPREFIX --use-conda $RULE --container-image $DOCKERIMAGE
 
 #Run run_bwa_mem
 RULE=run_bwa_mem
 gcloud container clusters update $CLUSTERNAME --update-labels sample-count=$SAMPLES,rule=$RULE,run-id=$RUNID --zone $CLUSTERZONE
-snakemake  -p --verbose --keep-remote  -j 400 --kubernetes -s $SNAKEFILE --default-remote-provider GS  --default-remote-prefix $GSPREFIX --use-conda $RULE
+snakemake  -p --verbose --keep-remote  -j 400 --kubernetes -s $SNAKEFILE --default-remote-provider GS  --default-remote-prefix $GSPREFIX --use-conda $RULE --container-image $DOCKERIMAGE
 
 
 #Run run_coverage
 RULE=run_coverage
 gcloud container clusters update $CLUSTERNAME --update-labels sample-count=$SAMPLES,rule=$RULE,run-id=$RUNID --zone $CLUSTERZONE
-snakemake  -p --verbose --keep-remote  -j 400 --kubernetes -s $SNAKEFILE --default-remote-provider GS  --default-remote-prefix $GSPREFIX --use-conda $RULE
+snakemake  -p --verbose --keep-remote  -j 400 --kubernetes -s $SNAKEFILE --default-remote-provider GS  --default-remote-prefix $GSPREFIX --use-conda $RULE --container-image $DOCKERIMAGE
 
 
 #Run run_metabat2
 RULE=run_metabat2
 gcloud container clusters update $CLUSTERNAME --update-labels sample-count=$SAMPLES,rule=$RULE,run-id=$RUNID --zone $CLUSTERZONE
-snakemake  -p --verbose --keep-remote  -j 400 --kubernetes -s $SNAKEFILE --default-remote-provider GS  --default-remote-prefix $GSPREFIX --use-conda $RULE
+snakemake  -p --verbose --keep-remote  -j 400 --kubernetes -s $SNAKEFILE --default-remote-provider GS  --default-remote-prefix $GSPREFIX --use-conda $RULE --container-image $DOCKERIMAGE
 
 
 #Run run_checkm
 RULE=run_checkm
 gcloud container clusters update $CLUSTERNAME --update-labels sample-count=$SAMPLES,rule=$RULE,run-id=$RUNID --zone $CLUSTERZONE
-snakemake  -p --verbose --keep-remote  -j 400 --kubernetes -s $SNAKEFILE --default-remote-provider GS  --default-remote-prefix $GSPREFIX --use-conda $RULE
+snakemake  -p --verbose --keep-remote  -j 400 --kubernetes -s $SNAKEFILE --default-remote-provider GS  --default-remote-prefix $GSPREFIX --use-conda $RULE --container-image $DOCKERIMAGE
 
 
 #Reset labels
