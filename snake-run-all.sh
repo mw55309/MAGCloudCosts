@@ -45,3 +45,6 @@ snakemake  -p --verbose --keep-remote  -j 400 --kubernetes -s $SNAKEFILE --defau
 RULE=run_checkm
 gcloud container clusters update $CLUSTERNAME --update-labels sample-count=$SAMPLES,rule=$RULE,run-id=$RUNID --zone $CLUSTERZONE
 snakemake  -p --verbose --keep-remote  -j 400 --kubernetes -s $SNAKEFILE --default-remote-provider GS  --default-remote-prefix $GSPREFIX --use-conda $RULE
+
+#Reset labels
+gcloud container clusters update $CLUSTERNAME --update-labels sample-count=0,rule=idle,run-id=0 --zone $CLUSTERZONE
