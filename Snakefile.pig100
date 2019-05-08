@@ -154,10 +154,11 @@ rule metabat2:
 		dir=GS.remote(GS_PREFIX + "/metabat2/{id}/")
 	params:
 		out=GS.remote(GS_PREFIX + "/metabat2/{id}/{id}")
-	threads: 9
+	threads: 8
 	conda: "envs/metabat2.yaml"
 	shell:
 		'''
+		mkdir -p {output.dir}
 		metabat2 -t {threads} -i {input.asm} -a {input.cov} --unbinned -o {params.out}
 		'''
 
