@@ -195,7 +195,7 @@ rule checkm:
 		'''
 		cd {params.idr}
 		tar -xvf {params.id}.tar
-		cd ../../..
+		cd ../../../..
 
 		mkdir -p checkm_data
 		cd checkm_data
