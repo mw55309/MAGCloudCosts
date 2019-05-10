@@ -3,7 +3,7 @@ from pathlib import Path
 from snakemake.remote.GS import RemoteProvider as GSRemoteProvider
 GS = GSRemoteProvider()
 
-GS_INPUT = "mw_test_metagenomics"
+GS_INPUT = "metagenomics-benchmarking"
 GS_PREFIX = GS_INPUT
 
 shell.executable("/bin/bash")
@@ -52,7 +52,7 @@ rule run_coverage:
 	input: GS.remote(expand(GS_PREFIX + "/coverage/{sample}.{sample2}.txt", sample=IDS, sample2=IDS2))
 
 rule run_metabat2:
-	input: GS.remote(expand(GS_PREFIX + "/metabat2/{sample}/{sample}.unbinned.fa", sample=IDS))
+	input: GS.remote(expand(GS_PREFIX + "/metabat2/{sample}/{sample}.tar", sample=IDS))
 
 rule run_checkm:
 	input: GS.remote(expand(GS_PREFIX + "/checkm/{sample}.checkm.txt", sample=IDS))
@@ -140,6 +140,7 @@ rule coverage:
 	output:
 		cov=GS.remote(GS_PREFIX + "/coverage/{each}.txt")
 	conda: "envs/metabat2.yaml"
+	threads: 8
 	shell:
 		'''
 		jgi_summarize_bam_contig_depths --outputDepth {output.cov} {input.bam}
@@ -151,40 +152,57 @@ rule metabat2:
 		cov=GS.remote(GS_PREFIX + "/coverage/{id}.txt")
 	output:
 		#unb=GS.remote(GS_PREFIX + "/metabat2/{id}/{id}.unbinned.fa"),
-		dir=GS.remote(GS_PREFIX + "/metabat2/{id}/")
+		#dir=GS.remote(GS_PREFIX + "/metabat2/{id}/")
+		tar=GS.remote(GS_PREFIX + "/metabat2/{id}/{id}.tar")
 	params:
+		id ="{id}",
+		dir=GS.remote(GS_PREFIX + "/metabat2/{id}"),
 		out=GS.remote(GS_PREFIX + "/metabat2/{id}/{id}")
 	threads: 8
 	conda: "envs/metabat2.yaml"
 	shell:
 		'''
-		mkdir -p {output.dir}
+		mkdir -p {params.dir}
 		metabat2 -t {threads} -i {input.asm} -a {input.cov} --unbinned -o {params.out}
+		cd {params.dir}
+		tar -c ./* > {params.id}.tar
 		'''
 
-rule checkm_data:
-	output: GS.remote(GS_PREFIX + "/checkm_data")
-	shell:
-		'''
-		mkdir -p {output}
-		cd {output}
-		wget https://data.ace.uq.edu.au/public/CheckM_databases/checkm_data_2015_01_16.tar.gz
-		gunzip < checkm_data_2015_01_16.tar.gz | tar xvf -
-		cd ..
-		'''
+#rule checkm_data:
+#	output: GS.remote(GS_PREFIX + "/checkm_data")
+#	shell:
+#		'''
+#		mkdir -p {output}
+#		cd {output}
+#		wget https://data.ace.uq.edu.au/public/CheckM_databases/checkm_data_2015_01_16.tar.gz
+#		-
+#		cd ..
+#		'''
 
 rule checkm:
 	input:
-		dir=GS.remote(GS_PREFIX + "/metabat2/{id}/"),
-		cin=GS.remote(GS_PREFIX + "/checkm_data")
+		tar=GS.remote(GS_PREFIX + "/metabat2/{id}/{id}.tar")		
+		#dir=GS.remote(GS_PREFIX + "/metabat2/{id}/")
+		#cin=GS.remote(GS_PREFIX + "/checkm_data")
 	output: GS.remote(GS_PREFIX + "/checkm/{id}.checkm.txt")
 	params:
-		dir=GS.remote(GS_PREFIX + "/checkm/{id}")
+		id ="{id}",
+		dir=GS.remote(GS_PREFIX + "/checkm/{id}"),
+		idr=GS.remote(GS_PREFIX + "/metabat2/{id}")
 	threads: 8
 	conda: "envs/checkm.yaml"
 	shell:
 		'''
-		echo {input.cin} | checkm data setRoot {input.cin}
-		checkm lineage_wf --tab_table -f {output} --reduced_tree -t {threads} -x fa {input.dir} {params.dir}
+		cd {params.idr}
+		tar -xvf {params.id}.tar
+		cd ../../..
+
+		mkdir -p checkm_data
+		cd checkm_data
+		wget https://data.ace.uq.edu.au/public/CheckM_databases/checkm_data_2015_01_16.tar.gz
+		gunzip < checkm_data_2015_01_16.tar.gz | tar xvf -
+		cd ..
+		echo checkm_data | checkm data setRoot checkm_data
+		checkm lineage_wf --tab_table -f {output} --reduced_tree -t {threads} -x fa {params.idr} {params.dir}
 		'''
 
