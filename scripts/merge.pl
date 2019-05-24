@@ -1,10 +1,10 @@
 #!/usr/bin/perl
 
-#!/usr/bin/perl
-
 use Data::Dumper;
 
 my @files = @ARGV;
+
+my @order;
 
 my $d;
 my %contigs;
@@ -28,6 +28,9 @@ foreach $f (@files) {
 	while(<IN>) {
 		chomp();
 		my($cn,$cl,$tad,$dep,$v) = split(/\t/);
+		unless (exists $contigs{$cn}) {
+			push(@order, $cn);
+		}
 		$contigs{$cn}++;
 		#print "Setting $cn length to $cl\n";
 		$d->{$cn}->{length} = $cl;
@@ -51,7 +54,8 @@ foreach $f (@files) {
 }
 print "\n";
 
-foreach $cn (keys %contigs) {
+#foreach $cn (keys %contigs) {
+foreach $cn (@order) {
 	#print "Processing $cn\n";
 	print $cn, "\t", $d->{$cn}->{length}, "\t", $d->{$cn}->{tad};
 
@@ -64,5 +68,6 @@ foreach $cn (keys %contigs) {
 	}
 	print "\n";
 }
+
 
 
