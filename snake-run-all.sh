@@ -2,7 +2,7 @@
 
 set -x #echo on
 SAMPLES=5
-RUNID=3
+RUNID=16
 CLUSTERNAME=metagenomics-benchmarking
 CLUSTERZONE=europe-west1-d
 GSPREFIX=metagenomics-benchmarking
@@ -39,6 +39,14 @@ snakemake  -p --verbose --keep-remote  -j 400 --kubernetes -s $SNAKEFILE --defau
 
 #Run run_bwa_mem
 RULE=run_bwa_mem
+gcloud container clusters update $CLUSTERNAME --update-labels sample-count=$SAMPLES,rule=$RULE,run-id=$RUNID --zone $CLUSTERZONE
+snakemake  -p --verbose --keep-remote  -j 400 --kubernetes -s $SNAKEFILE --default-remote-provider GS  --default-remote-prefix $GSPREFIX --use-conda $RULE --container-image $DOCKERIMAGE
+
+sleep 10m
+snakemake  -p --verbose --keep-remote  -j 400 --kubernetes -s $SNAKEFILE --default-remote-provider GS  --default-remote-prefix $GSPREFIX --use-conda $RULE --container-image $DOCKERIMAGE
+
+#Run single_coverage
+RULE=run_single_coverage
 gcloud container clusters update $CLUSTERNAME --update-labels sample-count=$SAMPLES,rule=$RULE,run-id=$RUNID --zone $CLUSTERZONE
 snakemake  -p --verbose --keep-remote  -j 400 --kubernetes -s $SNAKEFILE --default-remote-provider GS  --default-remote-prefix $GSPREFIX --use-conda $RULE --container-image $DOCKERIMAGE
 
