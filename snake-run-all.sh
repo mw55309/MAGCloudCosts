@@ -6,7 +6,7 @@ RUNID=16
 CLUSTERNAME=metagenomics-benchmarking
 CLUSTERZONE=europe-west1-d
 GSPREFIX=metagenomics-benchmarking
-SNAKEFILE=Snakefile.pig${SAMPLES}
+SNAKEFILE=Snakefile.sc.pig${SAMPLES}
 DOCKERIMAGE='gcr.io/tagareby/snakemake'
 
 snakemake -s $SNAKEFILE --unlock
